@@ -115,10 +115,10 @@ architecture biggermem of register32 is
 	signal write16: std_logic;
 
 begin
-	--enable8 will act as active low(give output) as soon as any enable is active low.
+	--enable8 will act as active low (give output) as soon as any enable is active low.
 	enable8 <= enout32 and enout16 and enout8;
 	
-	--enable16 will act as active low(give output) as soon as either enout32 aor enout16 is active low.
+	--enable16 will act as active low (give output) as soon as either enout32 aor enout16 is active low.
 	enable16 <= enout32 and enout16;
 	
 	--write8 will output data whenever any of the following are active high
