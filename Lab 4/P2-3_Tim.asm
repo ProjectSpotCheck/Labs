@@ -9,16 +9,13 @@ main:
 	li	t0, 0x4F302C85		# DataIn1
  	li 	t1, 0x7A222578		# DataIn2
  	
- 	# I use addiu here because in the vhdl code we dont use the carry out
- 	#addiu 	$t3, $t0, 0x7A222578	# Expected add = 0xC95251FD
+ 	# I use add here instead of addi because addi in RISC-V does not allow immediate of more than 12 bits
  	add 	t2, t0, t1		# Expected add = 0xC95251FD
  	sub 	t3, t0, t1		# Expected sub = 0xD50E070D
  
 	li 	t0, 0xC0765A22 		# DataIn1
  	li 	t1, 0xB4059ADD		# DataIn2
  	
- 	# Addu is used because we dont worry about the carry out
- 	#addu 	$t5, $t0, $t1		# Expected add = 0x747BF4FF
  	add 	t4, t0, t1		# Expected add = 0x747BF4FF
  	sub 	t5, t0, t1		# Expected sub = 0x0C70BF45
  	
@@ -44,4 +41,6 @@ main:
  	
  	li 	s3, 0xAAAAAAAA 		# DataIn1
  	li 	s4, 0x55555555 		# DataIn2
+ 	
+ 	# I use or here instead of ori since ori in RISC-V does not allow immediate of more than 12 bits
  	or	s3, s3, s4		# Expected: 0xFFFFFFFF	
