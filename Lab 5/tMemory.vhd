@@ -1,11 +1,4 @@
 
-
--- Developer : Tim Nguyen and Jack Nelson
--- Project   : Lab 5
--- Filename  : Memory.vhd
--- Date      : 6/1/18
---  LAB #5 - Memory and Register Bank
-
 LIBRARY ieee;
 Use ieee.std_logic_1164.all;
 Use ieee.numeric_std.all;
@@ -200,79 +193,78 @@ BEGIN
 		-- Register Bank tests
 --Writing to the registers at at specific address
 		dataIn   <= X"11111111";
-		writeReg <= "00001";
+		writeReg <= "01010";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"22222222";
-		writeReg <= "00010";
+		writeReg <= "01011";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"33333333";
-		writeReg <= "00011";
+		writeReg <= "01100";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"44444444";
-		writeReg <= "00100";
+		writeReg <= "01101";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"55555555";
-		writeReg <= "00101";
+		writeReg <= "01110";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"66666666";
-		writeReg <= "00110";
+		writeReg <= "01111";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"77777777";
-		writeReg <= "00111";
+		writeReg <= "10000";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		dataIn   <= X"88888888";
-		writeReg <= "01000";
+		writeReg <= "10001";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
 
 		readReg1 <= "00000";
-		readReg2 <= "00001";
+		readReg2 <= "01010";
 		wait for 10 ns;	
 
-		readReg1 <= "00010";
-		readReg2 <= "00100";
+		readReg1 <= "01011";
+		readReg2 <= "01100";
 		wait for 10 ns;	
 
-		readReg1 <= "00011";
-		readReg2 <= "00100";
+		readReg1 <= "01101";
+		readReg2 <= "01110";
 		wait for 10 ns;	
 
-		readReg1 <= "00101";
-		readReg2 <= "01000";
+		readReg1 <= "01111";
+		readReg2 <= "10000";
 		wait for 10 ns;	
 
-		readReg1 <= "00111";
-		readReg2 <= "00000";
+		readReg1 <= "10001";
 		wait for 10 ns;	
 
 		wait; -- will wait forever

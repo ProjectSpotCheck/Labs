@@ -175,101 +175,72 @@ entity Registers is
 end entity Registers;
 
 architecture remember of Registers is
+
 	component register32
   	    port(datain: in std_logic_vector(31 downto 0);
 		 enout32,enout16,enout8: in std_logic;
 		 writein32, writein16, writein8: in std_logic;
 		 dataout: out std_logic_vector(31 downto 0));
 	end component;
---INPUT AND OUTPUT FOR ZERO REGISTER--
-	signal zeri: STD_LOGIC_VECTOR(31 downto 0);
-        signal zerou: STD_LOGIC_VECTOR(31 downto 0);
-	signal zer: STD_LOGIC_VECTOR(31 downto 0):=X"00000000";
 
-	--------INPUT FOR A0 - A7--------
-	signal a0o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a1o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a2o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a3o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a4o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a5o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a6o: STD_LOGIC_VECTOR(31 downto 0);
-	signal a7o: STD_LOGIC_VECTOR(31 downto 0);
-	
-	--------OUTPUT FOR A0 - A7 -------
-	signal a0i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a1i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a2i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a3i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a4i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a5i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a6i: STD_LOGIC_VECTOR(31 downto 0);
-	signal a7i: STD_LOGIC_VECTOR(31 downto 0);
-	signal highz: STD_LOGIC_VECTOR(31 DOWNTO 0):= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	
-	begin
-	
-	---DEMUX FOR CHOOSING REGISTER TO WRITE---
-	zeri <= zer;      --when WriteCmd&writereg="100000";
-	a0i <= writeData when WriteCmd&writereg="100001";
-	a1i <= writeData when WriteCmd&writereg="100010";
-	a2i <= writeData when WriteCmd&writereg="100011";
-	a3i <= writeData when WriteCmd&writereg="100100";
-	a4i <= writeData when WriteCmd&writereg="100101";
-	a5i <= writeData when WriteCmd&writereg="100110";
-	a6i <= writeData when WriteCmd&writereg="100111";
-	a7i <= writeData when WriteCmd&writereg="101000";
-	
-	
-	
-	---MUX FOR CHOOSING OUTPUT REGISTER 1---
-	with ReadReg1 select
-		            ReadData1 <= zerou when "00000",
-				           a0o when "00001",
-					   a1o when "00010",
-					   a2o when "00011",
-					   a3o when "00100",
-					   a4o when "00101",
-					   a5o when "00110",
-					   a6o when "00111",
-					   a7o when "01000",
-	                                 highz when others;
-	
-	
-	
-	
-	---MuX FOR CHOOSING OUTPUT REGISTER 2---
-		with ReadReg2 select
-		            ReadData2 <= zerou when "00000",
-				           a0o when "00001",
-					   a1o when "00010",
-					   a2o when "00011",
-					   a3o when "00100",
-					   a4o when "00101",
-					   a5o when "00110",
-					   a6o when "00111",
-					   a7o when "01000",
-	                                 highz when others;
-	
-	
-	
---out: active low
---in: active high
-------------------------        datin oe32 oe16 oe8      we32    we16  we8   datout
-       x0: register32  PORT MAP(zeri, '0', '1', '1', WriteCmd, '0',  '0', zerou);
-	a0: register32  PORT MAP(a0i, '0', '1', '1', WriteCmd, '0',  '0', a0o);
-	a1: register32  PORT MAP(a1i, '0', '1', '1', WriteCmd, '0',  '0', a1o);
-	a2: register32  PORT MAP(a2i, '0', '1', '1', WriteCmd, '0',  '0', a2o);
-	a3: register32  PORT MAP(a3i, '0', '1', '1', WriteCmd, '0',  '0', a3o);
-	a4: register32  PORT MAP(a4i, '0', '1', '1', WriteCmd, '0',  '0', a4o);
-	a5: register32  PORT MAP(a5i, '0', '1', '1', WriteCmd, '0',  '0', a5o);
-	a6: register32  PORT MAP(a6i, '0', '1', '1', WriteCmd, '0',  '0', a6o);
-	a7: register32  PORT MAP(a7i, '0', '1', '1', WriteCmd, '0',  '0', a7o);
-	
-
-	
+	signal enable: std_logic; -- to always enable registers
+	signal ZeroReg: std_logic_vector(31 downto 0); -- 
+	signal ZeroOut: std_logic_vector(31 downto 0);
+	signal Zero_write: std_logic;
+	signal a0_write, a1_write, a2_write, a3_write, a4_write, a5_write, a6_write, a7_write: std_logic;
+	signal a0_out, a1_out, a2_out, a3_out, a4_out, a5_out, a6_out, a7_out: std_logic_vector(31 downto 0);
+	signal Fail_read: std_logic_vector(31 downto 0);
 begin
-    -- Add your code here for the Register Bank implementation
+	--INITIALIZE SIGNALS--
+	Zero_write <= '1';
+	enable <= '0'; -- registers are always enabled
+	ZeroReg <= X"00000000"; -- output of zero register is always 0
+	Fail_read(31 downto 0) <= (others => 'Z');
+
+ 	--WRITE--
+	a0_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01010")) else '0';
+	a1_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01011")) else '0';
+	a2_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01100")) else '0';
+	a3_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01101")) else '0';
+	a4_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01110")) else '0';
+	a5_write <= '1' when ((WriteCmd = '1') and (WriteReg = "01111")) else '0';
+	a6_write <= '1' when ((WriteCmd = '1') and (WriteReg = "10000")) else '0';
+	a7_write <= '1' when ((WriteCmd = '1') and (WriteReg = "10001")) else '0';
+	
+	--REGISTERS--
+	Zero: register32 port map(ZeroReg, enable, enable, enable, Zero_write, Zero_write, Zero_write, ZeroOut);
+	a0: register32 port map(WriteData, enable, enable, enable, a0_write, a0_write, a0_write, a0_out);
+	a1: register32 port map(WriteData, enable, enable, enable, a1_write, a1_write, a1_write, a1_out);
+	a2: register32 port map(WriteData, enable, enable, enable, a2_write, a2_write, a2_write, a2_out);
+	a3: register32 port map(WriteData, enable, enable, enable, a3_write, a3_write, a3_write, a3_out);
+	a4: register32 port map(WriteData, enable, enable, enable, a4_write, a4_write, a4_write, a4_out);
+	a5: register32 port map(WriteData, enable, enable, enable, a5_write, a5_write, a5_write, a5_out);
+	a6: register32 port map(WriteData, enable, enable, enable, a6_write, a6_write, a6_write, a6_out);
+	a7: register32 port map(WriteData, enable, enable, enable, a7_write, a7_write, a7_write, a7_out);
+
+	--READ--
+	with ReadReg1 select
+		ReadData1 <= ZeroOut when "00000", -- Zero reg # x0 = 00000
+			     	a0_out when "01010",  -- a0 reg # x10 = 01010
+				a1_out when "01011",  -- a1 reg # x11 = 01011
+				a2_out when "01100",  -- a2 reg # x12 = 01100
+				a3_out when "01101",  -- a3 reg # x13 = 01101
+				a4_out when "01110",  -- a4 reg # x14 = 01110	
+				a5_out when "01111",  -- a5 reg # x15 = 01111
+				a6_out when "10000",  -- a6 reg # x16 = 10000
+				a7_out when "10001",  -- a7 reg # x17 = 10001
+				Fail_read when others;
+	with ReadReg2 select
+		ReadData2 <= ZeroOut when "00000", -- Zero reg #00000
+			     	a0_out when "01010",  -- a0 reg # x10 = 01010
+				a1_out when "01011",  -- a1 reg # x11 = 01011
+				a2_out when "01100",  -- a2 reg # x12 = 01100
+				a3_out when "01101",  -- a3 reg # x13 = 01101
+				a4_out when "01110",  -- a4 reg # x14 = 01110	
+				a5_out when "01111",  -- a5 reg # x15 = 01111
+				a6_out when "10000",  -- a6 reg # x16 = 10000
+				a7_out when "10001",  -- a7 reg # x17 = 10001
+				Fail_read when others;
 
 end remember;
 
